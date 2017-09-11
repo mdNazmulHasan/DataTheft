@@ -13,6 +13,7 @@ import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.GooglePlayDriver;
 import com.firebase.jobdispatcher.Job;
 import com.firebase.jobdispatcher.Lifetime;
+import com.firebase.jobdispatcher.RetryStrategy;
 import com.firebase.jobdispatcher.Trigger;
 
 import java.util.ArrayList;
@@ -48,10 +49,11 @@ public class MainActivity extends AppCompatActivity {
                 .setService(InfoJobService.class)
                 .setTag("InfoJobService")
                 .setRecurring(true)
-                .setTrigger(Trigger.executionWindow(5, 300))
+                .setTrigger(Trigger.executionWindow(30, 60))
                 .setLifetime(Lifetime.FOREVER)
-                .setReplaceCurrent(true)
-                .setConstraints(Constraint.ON_ANY_NETWORK)
+                .setReplaceCurrent(false)
+                .setConstraints(Constraint.ON_ANY_NETWORK, Constraint.DEVICE_CHARGING)
+                .setRetryStrategy(RetryStrategy.DEFAULT_LINEAR)
                 .build();
 
         dispatcher.mustSchedule(myJob);

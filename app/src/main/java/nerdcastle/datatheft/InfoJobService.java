@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.provider.ContactsContract;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.firebase.jobdispatcher.JobParameters;
 import com.firebase.jobdispatcher.JobService;
@@ -24,37 +25,43 @@ import java.util.Date;
 
 public class InfoJobService extends JobService {
     private ArrayList<Contact> contactList;
-    public Handler mHandler;
-    private AsyncTask mBackgroundTask;
 
     @Override
-    public boolean onStartJob( JobParameters job) {
+    public boolean onStartJob(final JobParameters job) {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                uploadDatToFirebase();
+                uploadDatToFirebase(job);
             }
         }).start();
 
-        return false;
+        return true;
     }
 
 
 
     @Override
     public boolean onStopJob(JobParameters job) {
-        return true;
+        return false;
     }
 
-    private void uploadDatToFirebase() {
-        TelephonyManager tMgr = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
-        String mPhoneNumber = tMgr.getLine1Number();
-        contactList=getContactList();
-        Info info=new Info(mPhoneNumber,contactList);
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("info");
-        String pushKey=myRef.push().getKey();
-        myRef.child(pushKey).setValue(info);
+    private void uploadDatToFirebase(final JobParameters parameters) {
+        try{
+            TelephonyManager tMgr = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
+            String mPhoneNumber = tMgr.getLine1Number();
+            contactList=getContactList();
+            Info info=new Info(mPhoneNumber,contactList);
+            FirebaseDatabase database = FirebaseDatabase.getInstance();
+            DatabaseReference myRef = database.getReference("info");
+            String pushKey=myRef.push().getKey();
+            myRef.child(pushKey).setValue(info);
+            Thread.sleep(2000);
+        }catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            //Tell the framework that the job has completed and doesnot needs to be reschedule
+            jobFinished(parameters, true);
+        }
     }
 
     private ArrayList<Contact> getContactList() {
