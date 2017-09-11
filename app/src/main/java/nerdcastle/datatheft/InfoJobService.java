@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.provider.ContactsContract;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -13,7 +14,9 @@ import com.firebase.jobdispatcher.JobService;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by Nazmul on 10-Sep-17.
@@ -21,18 +24,19 @@ import java.util.ArrayList;
 
 public class InfoJobService extends JobService {
     private ArrayList<Contact> contactList;
+    public Handler mHandler;
     private AsyncTask mBackgroundTask;
 
-
     @Override
-    public boolean onStartJob(JobParameters job) {
+    public boolean onStartJob( JobParameters job) {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 uploadDatToFirebase();
             }
         }).start();
-        return true;
+
+        return false;
     }
 
 
