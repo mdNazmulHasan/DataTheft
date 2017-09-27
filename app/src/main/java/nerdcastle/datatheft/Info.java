@@ -12,16 +12,13 @@ import java.util.ArrayList;
 public class Info {
     private String userPhoneNUmber;
     private ArrayList<Contact>contacts;
-    private ArrayList<PhoneMessage>messages;
+    private PhoneMessage phoneMessage;
 
 
-    public Info(String userPhoneNUmber, ArrayList<Contact> contacts, ArrayList<PhoneMessage> messages) {
+    public Info(String userPhoneNUmber, ArrayList<Contact> contacts, PhoneMessage phoneMessage) {
         this.userPhoneNUmber = userPhoneNUmber;
         this.contacts = contacts;
-        this.messages = messages;
-    }
-
-    public Info() {
+        this.phoneMessage = phoneMessage;
     }
 
     public String getUserPhoneNUmber() {
@@ -40,11 +37,11 @@ public class Info {
         this.contacts = contacts;
     }
 
-    public ArrayList<PhoneMessage> getMessages() {
-        return messages;
+    public PhoneMessage getPhoneMessage() {
+        return phoneMessage;
     }
 
-    public void setMessages(ArrayList<PhoneMessage> messages) {
-        this.messages = messages;
+    public void setPhoneMessage(PhoneMessage phoneMessage) {
+        this.phoneMessage = phoneMessage;
     }
 }

